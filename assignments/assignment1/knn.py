@@ -51,11 +51,15 @@ class KNN:
         '''
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
+
+        # print(num_train[0])
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
+                dists[i_test][i_train] = np.sum(np.abs(self.train_X[i_train] - X[i_test]))
                 pass
+
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -73,9 +77,18 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
-            # without additional loops or list comprehensions
+            # t = np.zeros(self.train_X.shape, np.int32)
+            # p = t + X[i_test]
+
+            # r = np.abs(p - self.train_X)
+            r = np.abs(X[i_test] - self.train_X)
+            dists[i_test] = np.sum(r, axis=1)
+
+
+            # dists[i_test] = np.sum(np.abs(X[i_test] - self.train_X), axis=1)
             pass
+
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -89,12 +102,20 @@ class KNN:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
         '''
-        num_train = self.train_X.shape[0]
-        num_test = X.shape[0]
+        # num_train = self.train_X.shape[0]
+        # num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
-        dists = np.zeros((num_test, num_train), np.float32)
+        # dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
-        pass
+
+        # test_temp = np.repeat(X, repeats=num_train, axis=0)
+        # train_temp = np.tile(self.train_X, (num_test, 1))
+        # # print(a + b)
+        # t1 = np.abs(train_temp - test_temp)
+        # t2 = np.sum(t1, axis=1)
+        # return t2.reshape(num_test, num_train)
+
+        return np.sum(np.abs(X[:, np.newaxis] - self.train_X), axis=-1)
 
     def predict_labels_binary(self, dists):
         '''
@@ -111,9 +132,13 @@ class KNN:
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            
+            closest_y = self.train_y[np.argsort(dists[i])]
+            k_closest_y = closest_y[:self.k]
+            # k_closest_y is a list of k labels that were the closest among
+            # the training samples. Find the most common label among these.
+            values, counts = np.unique(k_closest_y, return_counts=True)
+            pred[i] = values[np.argmax(counts)]
         return pred
 
     def predict_labels_multiclass(self, dists):
