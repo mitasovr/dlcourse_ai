@@ -132,12 +132,18 @@ class KNN:
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            
+            # argsort - sort array, result will have indexes to original array
+            # self.train_y - array of boolean values false - 0, true - 9
+            # closest_y - sorted array of true/false, closests - first
             closest_y = self.train_y[np.argsort(dists[i])]
+            
+            # k_closest_y - k samples
             k_closest_y = closest_y[:self.k]
-            # k_closest_y is a list of k labels that were the closest among
-            # the training samples. Find the most common label among these.
+
+            # calc count of true and false
             values, counts = np.unique(k_closest_y, return_counts=True)
+
+            # pick most popular option
             pred[i] = values[np.argmax(counts)]
         return pred
 
@@ -154,10 +160,16 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
+            closest_y = self.train_y[np.argsort(dists[i])]
+
+            k_closest_y = closest_y[:self.k]
+
+            values, counts = np.unique(k_closest_y, return_counts=True)
+            pred[i] = values[np.argmax(counts)]
+            # pred[i] = values
+
             # nearest training samples
             pass
         return pred
